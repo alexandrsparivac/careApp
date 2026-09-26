@@ -1,0 +1,131 @@
+@import '@fontsource-variable/onest';
+@import '@fontsource/unbounded/500.css';
+@import '@fontsource/unbounded/700.css';
+@import 'tailwindcss';
+
+/*
+  CareBridge visual identity
+  - petrol (brand)  — structure: sidebar, primary actions
+  - sun             — "now": current-time marker, highlights. Used sparingly.
+  - dusk            — planned / upcoming
+  - ok / warn / bad — semantic state only, never decoration
+  - dawn/day/dusk   — time-of-day coding of activities
+  Type: Onest for text, Unbounded for the wordmark and large numerals.
+*/
+@theme {
+  --font-sans: 'Onest Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Unbounded', 'Onest Variable', system-ui, sans-serif;
+
+  --color-brand-50: #edf4f5;
+  --color-brand-100: #d2e5e8;
+  --color-brand-200: #a6cbd1;
+  --color-brand-300: #6fa9b3;
+  --color-brand-500: #2a7886;
+  --color-brand-600: #1c5e6b;
+  --color-brand-700: #164b56;
+  --color-brand-800: #113b44;
+  --color-brand-900: #0d2d34;
+  --color-brand-950: #09222a;
+
+  --color-sun-50: #fdf4e4;
+  --color-sun-200: #f6d29a;
+  --color-sun-500: #e9a23b;
+  --color-sun-600: #c9831f;
+
+  --color-dusk-50: #eeeffa;
+  --color-dusk-200: #c9cbee;
+  --color-dusk-500: #5b5fa8;
+  --color-dusk-600: #4a4e94;
+
+  --color-ink: #13222a;
+  --color-ink-soft: #485a61;
+  --color-ink-faint: #74868c;
+
+  --color-surface: #f1f4f3;
+  --color-surface-2: #e6eceb;
+  --color-line: #d6dedd;
+
+  --color-ok-50: #eaf5ec;
+  --color-ok-600: #3a8a4b;
+  --color-ok-700: #2c6b3a;
+  --color-warn-50: #fdf3e1;
+  --color-warn-600: #b26f0f;
+  --color-warn-700: #8c5708;
+  --color-bad-50: #fcebe8;
+  --color-bad-600: #c23b2c;
+  --color-bad-700: #9e2e21;
+  --color-plan-50: #eeeffa;
+  --color-plan-600: #4a4e94;
+
+  --shadow-card: 0 1px 2px rgb(13 45 52 / 0.05), 0 10px 28px -16px rgb(13 45 52 / 0.18);
+  --shadow-float: 0 2px 6px rgb(13 45 52 / 0.08), 0 24px 48px -20px rgb(13 45 52 / 0.35);
+}
+
+html {
+  font-size: 17px; /* slightly larger base — many family members are older adults */
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  @apply bg-surface font-sans text-ink;
+  /* faint paper grain so large empty areas don't feel flat */
+  background-image: radial-gradient(rgb(13 45 52 / 0.035) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.eyebrow {
+  @apply text-xs font-semibold tracking-[0.12em] uppercase;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-sun-500);
+  outline-offset: 2px;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-rise {
+  animation: rise 0.35s ease-out both;
+}
+
+@keyframes pulse-ring {
+  0% {
+    r: 7;
+    opacity: 0.6;
+  }
+  100% {
+    r: 16;
+    opacity: 0;
+  }
+}
+.sun-pulse {
+  animation: pulse-ring 2.4s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
