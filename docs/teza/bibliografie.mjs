@@ -1,0 +1,35 @@
+// Surse bibliografice, redactate conform SM ISO 690:2012.
+// Numerotarea se face automat, în ordinea primei citări în text ([@cheie]).
+const C = '[citat 26.09.2026]'
+
+export const BIB = {
+  whoAgeing: `WORLD HEALTH ORGANIZATION. Ageing and health [online]. Fact sheet, 1 octombrie 2024 ${C}. Disponibil: https://www.who.int/news-room/fact-sheets/detail/ageing-and-health`,
+  who2015: 'WORLD HEALTH ORGANIZATION. World report on ageing and health. Geneva: World Health Organization, 2015. ISBN 978-92-4-156504-2.',
+  unWpp: `UNITED NATIONS, DEPARTMENT OF ECONOMIC AND SOCIAL AFFAIRS, POPULATION DIVISION. World Population Prospects 2024: Summary of Results [online]. New York: United Nations, 2024 ${C}. Disponibil: https://population.un.org/wpp/`,
+  eurostat: `EUROSTAT. Population structure and ageing [online]. Statistics Explained. Luxembourg: Eurostat, 2024 ${C}. Disponibil: https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Population_structure_and_ageing`,
+  bns: `BIROUL NAȚIONAL DE STATISTICĂ AL REPUBLICII MOLDOVA. Populația și procesele demografice [online]. Chișinău: BNS ${C}. Disponibil: https://statistica.gov.md/`,
+  ecLtc: 'EUROPEAN COMMISSION, SOCIAL PROTECTION COMMITTEE. 2021 Long-term care report: Trends, challenges and opportunities in an ageing society. Volume I. Luxembourg: Publications Office of the European Union, 2021.',
+  gdpr: 'Regulamentul (UE) 2016/679 al Parlamentului European și al Consiliului din 27 aprilie 2016 privind protecția persoanelor fizice în ceea ce privește prelucrarea datelor cu caracter personal și privind libera circulație a acestor date (Regulamentul general privind protecția datelor). In: Jurnalul Oficial al Uniunii Europene, L 119, 4 mai 2016, pp. 1-88.',
+  lege133: 'Legea nr. 133 din 08.07.2011 privind protecția datelor cu caracter personal. In: Monitorul Oficial al Republicii Moldova, 2011, nr. 170-175, art. 492.',
+  caringbridge: `CARINGBRIDGE. CaringBridge: Health journal for family and friends [online]. ${C}. Disponibil: https://www.caringbridge.org/`,
+  lotsa: `LOTSA HELPING HANDS. Lotsa Helping Hands: care calendar and community [online]. ${C}. Disponibil: https://lotsahelpinghands.com/`,
+  caringvillage: `CARING VILLAGE. Caring Village: family caregiving app [online]. ${C}. Disponibil: https://www.caringvillage.com/`,
+  jointly: `CARERS UK. Jointly: the app for carers [online]. ${C}. Disponibil: https://www.jointlyapp.com/`,
+  birdie: `BIRDIE CARE SERVICES. Birdie: home care management software [online]. ${C}. Disponibil: https://www.birdie.care/`,
+  medisafe: `MEDISAFE. Medisafe: medication management [online]. ${C}. Disponibil: https://www.medisafeapp.com/`,
+  sommerville: 'SOMMERVILLE, Ian. Software Engineering. 10th ed. Boston: Pearson, 2016. ISBN 978-0-13-394303-0.',
+  agile: `BECK, Kent et al. Manifesto for Agile Software Development [online]. 2001 ${C}. Disponibil: https://agilemanifesto.org/`,
+  react: `META OPEN SOURCE. React: The library for web and native user interfaces [online]. Documentație ${C}. Disponibil: https://react.dev/`,
+  typescript: `MICROSOFT. TypeScript Handbook [online]. Documentație ${C}. Disponibil: https://www.typescriptlang.org/docs/handbook/`,
+  vite: `VITE CONTRIBUTORS. Vite: Getting Started [online]. Documentație ${C}. Disponibil: https://vite.dev/guide/`,
+  tailwind: `TAILWIND LABS. Tailwind CSS Documentation [online]. ${C}. Disponibil: https://tailwindcss.com/docs`,
+  supabaseRls: `SUPABASE. Row Level Security [online]. Documentație Supabase ${C}. Disponibil: https://supabase.com/docs/guides/database/postgres/row-level-security`,
+  supabaseRealtime: `SUPABASE. Realtime: Postgres Changes [online]. Documentație Supabase ${C}. Disponibil: https://supabase.com/docs/guides/realtime/postgres-changes`,
+  postgresTriggers: `THE POSTGRESQL GLOBAL DEVELOPMENT GROUP. PostgreSQL Documentation: CREATE TRIGGER [online]. ${C}. Disponibil: https://www.postgresql.org/docs/current/sql-createtrigger.html`,
+  jwt: `JONES, M., BRADLEY, J., SAKIMURA, N. JSON Web Token (JWT). RFC 7519 [online]. Internet Engineering Task Force, 2015 ${C}. Disponibil: https://www.rfc-editor.org/rfc/rfc7519`,
+  vercel: `VERCEL. Vercel Documentation: Deployments [online]. ${C}. Disponibil: https://vercel.com/docs/deployments`,
+  owasp: `OWASP FOUNDATION. OWASP Top 10:2021 [online]. ${C}. Disponibil: https://owasp.org/Top10/`,
+  wcag: `WORLD WIDE WEB CONSORTIUM. Web Content Accessibility Guidelines (WCAG) 2.2. W3C Recommendation, 5 octombrie 2023 [online]. ${C}. Disponibil: https://www.w3.org/TR/WCAG22/`,
+  brooke: 'BROOKE, John. SUS: A „quick and dirty” usability scale. In: JORDAN, P. W., THOMAS, B., WEERDMEESTER, B. A., McCLELLAND, I. L., eds. Usability Evaluation in Industry. London: Taylor & Francis, 1996, pp. 189-194.',
+  nielsen: `NIELSEN, Jakob. Why You Only Need to Test with 5 Users [online]. Nielsen Norman Group, 2000 ${C}. Disponibil: https://www.nngroup.com/articles/why-you-only-need-to-test-with-5-users/`,
+}
