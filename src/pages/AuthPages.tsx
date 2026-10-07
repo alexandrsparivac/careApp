@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { Alert, Card as AntCard, Flex, Form, Input as AntInput, Radio, Typography } from 'antd'
+import { Alert, Card as AntCard, Form, Input as AntInput, Typography } from 'antd'
 import { HeartHandshake, ShieldCheck, Stethoscope } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -136,16 +136,17 @@ export function RegisterPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [sentEmail, setSentEmail] = useState<string | null>(null)
+  const [role, setRole] = useState<Exclude<Role, 'admin'>>('family')
 
   if (session) return <Navigate to="/" replace />
 
-  const submit = async (values: { full_name: string; email: string; phone?: string; password: string; role: Exclude<Role, 'admin'> }) => {
+  const submit = async (values: { full_name: string; email: string; phone?: string; password: string }) => {
     setLoading(true)
     setError(null)
     const { data, error } = await supabase.auth.signUp({
       email: values.email.trim(),
       password: values.password,
-      options: { data: { full_name: values.full_name.trim(), phone: values.phone?.trim() || null, role: values.role, language: lang } },
+      options: { data: { full_name: values.full_name.trim(), phone: values.phone?.trim() || null, role, language: lang } },
     })
     setLoading(false)
     if (error) return setError(error.message)
@@ -164,18 +165,36 @@ export function RegisterPage() {
 
   return (
     <AuthShell title={t('auth.registerTitle')} subtitle={t('auth.registerSubtitle')}>
-      <Form layout="vertical" initialValues={{ role: 'family' }} onFinish={(v) => void submit(v)} requiredMark={false}>
-        <Form.Item label={t('auth.iAm')} name="role" style={{ marginBottom: 16 }}>
-          <Radio.Group buttonStyle="solid" style={{ width: '100%' }}>
-            <Flex gap={8} style={{ width: '100%' }}>
-              <Radio.Button value="family" style={{ flex: 1, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <HeartHandshake size={17} /> {t('role.family')}
-              </Radio.Button>
-              <Radio.Button value="caregiver" style={{ flex: 1, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <Stethoscope size={17} /> {t('role.caregiver')}
-              </Radio.Button>
-            </Flex>
-          </Radio.Group>
+      <Form layout="vertical" onFinish={(v) => void submit(v)} requiredMark={false}>
+        <Form.Item label={t('auth.iAm')} style={{ marginBottom: 16 }}>
+          <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={t('auth.iAm')}>
+            {(
+              [
+                { role: 'family', icon: HeartHandshake },
+                { role: 'caregiver', icon: Stethoscope },
+              ] as const
+            ).map(({ role: r, icon: Icon }) => {
+              const active = role === r
+              return (
+                <button
+                  key={r}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => setRole(r)}
+                  className="flex flex-col items-center gap-1.5 rounded-xl border p-3.5 transition-all"
+                  style={
+                    active
+                      ? { borderColor: '#164b56', background: '#edf4f5', boxShadow: '0 0 0 2px #a6cbd1', color: '#164b56' }
+                      : { borderColor: '#d6dedd', background: '#fff', color: '#485a61' }
+                  }
+                >
+                  <Icon size={22} aria-hidden />
+                  <span className="font-semibold">{t(`role.${r}`)}</span>
+                </button>
+              )
+            })}
+          </div>
         </Form.Item>
         <Form.Item label={t('auth.fullName')} name="full_name" rules={[{ required: true }]}>
           <AntInput size="large" autoComplete="name" />
