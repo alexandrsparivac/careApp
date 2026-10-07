@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { ConfigProvider, App as AntApp, Result } from 'antd'
 import { Ban, Database } from 'lucide-react'
 import { isSupabaseConfigured } from './lib/supabase'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -8,6 +9,7 @@ import { I18nProvider, useI18n } from './i18n'
 import { Layout } from './components/Layout'
 import { LanguageSwitcher } from './components/LanguageSwitcher'
 import { Button, Spinner } from './components/ui'
+import { carebridgeTheme, antdLocale } from './theme/antd'
 import { LoginPage, RegisterPage } from './pages/AuthPages'
 import { DashboardPage } from './pages/Dashboard'
 import { EldersPage } from './pages/Elders'
@@ -21,14 +23,16 @@ import { ProfilePage } from './pages/Profile'
 
 function FullScreenNote({ icon, title, text, action }: { icon: React.ReactNode; title: string; text: string; action?: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center p-6">
       <div className="absolute top-4 right-4">
         <LanguageSwitcher />
       </div>
-      <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-900 text-sun-500">{icon}</span>
-      <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-      <p className="max-w-[56ch] whitespace-pre-line text-ink-soft">{text}</p>
-      {action}
+      <Result
+        icon={<span className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-[#0d2d34] text-[#e9a23b]">{icon}</span>}
+        title={title}
+        subTitle={<span className="whitespace-pre-line">{text}</span>}
+        extra={action}
+      />
     </div>
   )
 }
@@ -76,21 +80,32 @@ function SetupNeeded() {
 export default function App() {
   return (
     <I18nProvider>
-      {!isSupabaseConfigured ? (
-        <SetupNeeded />
-      ) : (
-        <BrowserRouter>
-          <ToastProvider>
-            <AuthProvider>
-              <Routes>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/*" element={<Protected />} />
-              </Routes>
-            </AuthProvider>
-          </ToastProvider>
-        </BrowserRouter>
-      )}
+      <ThemedApp />
     </I18nProvider>
+  )
+}
+
+function ThemedApp() {
+  const { lang } = useI18n()
+  return (
+    <ConfigProvider theme={carebridgeTheme} locale={antdLocale(lang)}>
+      <AntApp>
+        {!isSupabaseConfigured ? (
+          <SetupNeeded />
+        ) : (
+          <BrowserRouter>
+            <ToastProvider>
+              <AuthProvider>
+                <Routes>
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/*" element={<Protected />} />
+                </Routes>
+              </AuthProvider>
+            </ToastProvider>
+          </BrowserRouter>
+        )}
+      </AntApp>
+    </ConfigProvider>
   )
 }

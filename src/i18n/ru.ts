@@ -37,6 +37,7 @@ const ru: Dictionary = {
   'nav.messages': 'Сообщения',
   'nav.notifications': 'Уведомления',
   'nav.admin': 'Администрирование',
+  'nav.profile': 'Профиль',
   'nav.logout': 'Выйти',
 
   'role.admin': 'Администратор',

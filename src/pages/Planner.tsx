@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Card as AntCard, Flex, Space, Switch, Typography } from 'antd'
 import { addDays, addWeeks, endOfWeek, isSameDay, isToday, startOfWeek } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { fetchActivities, fetchElders, useQuery } from '../lib/api'
@@ -6,7 +7,7 @@ import type { CareActivity } from '../lib/types'
 import { useAuth } from '../context/AuthContext'
 import { useI18n } from '../i18n'
 import { ActivityDetailModal, ActivityFormModal, CATEGORY_ICON, DAY_PART_BAR, dayPart, isOverdue } from '../components/activities'
-import { Button, cn, PageHeader, Ring, Select, Spinner } from '../components/ui'
+import { Button, PageHeader, Ring, Select, Spinner, cn } from '../components/ui'
 
 const CHIP: Record<string, string> = {
   done: 'bg-ok-50 text-ok-700 border-ok-600/20',
@@ -49,18 +50,18 @@ export function PlannerPage() {
         }
       />
 
-      <div className="mb-5 flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-1 rounded-xl border border-line/70 bg-white p-1 shadow-card">
+      <Space wrap size={12} style={{ marginBottom: 20 }}>
+        <AntCard size="small" style={{ borderRadius: 12 }} styles={{ body: { padding: '4px 6px', display: 'flex', alignItems: 'center', gap: 4 } }}>
           <Button variant="ghost" size="sm" onClick={() => setWeekStart((w) => addWeeks(w, -1))} aria-label={t('common.prev')}>
             <ChevronLeft size={18} />
           </Button>
-          <span className="tabular min-w-48 px-2 text-center font-semibold">
+          <Typography.Text strong style={{ minWidth: 190, textAlign: 'center' }} className="tabular">
             {fmt(weekStart, 'd MMM')} – {fmt(weekEnd, 'd MMM yyyy')}
-          </span>
+          </Typography.Text>
           <Button variant="ghost" size="sm" onClick={() => setWeekStart((w) => addWeeks(w, 1))} aria-label={t('common.next')}>
             <ChevronRight size={18} />
           </Button>
-        </div>
+        </AntCard>
         <Button variant="secondary" size="sm" onClick={() => setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}>
           {t('planner.thisWeek')}
         </Button>
@@ -73,12 +74,12 @@ export function PlannerPage() {
           ))}
         </Select>
         {profile?.role !== 'family' && (
-          <label className="flex items-center gap-2 text-sm font-medium text-ink-soft">
-            <input type="checkbox" checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} className="h-4 w-4 accent-brand-600" />
-            {t('dashboard.onlyMine')}
-          </label>
+          <Flex align="center" gap={8}>
+            <Switch size="small" checked={onlyMine} onChange={setOnlyMine} />
+            <Typography.Text type="secondary" style={{ fontSize: 14 }}>{t('dashboard.onlyMine')}</Typography.Text>
+          </Flex>
         )}
-      </div>
+      </Space>
 
       {loading && !data ? (
         <Spinner />
@@ -90,7 +91,17 @@ export function PlannerPage() {
             const done = active.filter((a) => a.status === 'done').length
             const today = isToday(d)
             return (
-              <section key={d.toISOString()} className={cn('flex min-h-40 flex-col rounded-2xl border p-2', today ? 'border-sun-500/60 bg-sun-50/60' : 'border-line/70 bg-white/70')}>
+              <AntCard
+                key={d.toISOString()}
+                size="small"
+                style={{
+                  minHeight: 160,
+                  borderRadius: 16,
+                  borderColor: today ? '#e9a23b' : undefined,
+                  background: today ? '#fdf4e4' : undefined,
+                }}
+                styles={{ body: { padding: 8 } }}
+              >
                 <header className="mb-2 flex items-center justify-between gap-1 px-1 pt-0.5">
                   <div>
                     <p className={cn('eyebrow text-[0.65rem]', today ? 'text-sun-600' : 'text-ink-faint')}>{fmt(d, 'EEE')}</p>
@@ -128,7 +139,7 @@ export function PlannerPage() {
                     <Plus size={13} /> {t('common.add')}
                   </button>
                 )}
-              </section>
+              </AntCard>
             )
           })}
         </div>

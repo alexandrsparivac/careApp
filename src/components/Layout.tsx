@@ -1,134 +1,196 @@
-import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { Bell, CalendarDays, CalendarRange, HeartHandshake, LayoutDashboard, LogOut, Menu, MessagesSquare, ShieldCheck, X } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
-import { useNotifications } from '../context/NotificationsContext'
-import { useI18n, type TKey } from '../i18n'
-import { LanguageSwitcher } from './LanguageSwitcher'
-import { LogoMark, Wordmark } from './Logo'
-import { Avatar, cn } from './ui'
+import { useEffect, useState } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Avatar as AntAvatar, Badge as AntBadge, Button, Drawer, Dropdown, Flex, Layout as AntLayout, Menu, Space, Typography } from 'antd';
+import {
+  BellOutlined,
+  CalendarOutlined,
+  DashboardOutlined,
+  HeartOutlined,
+  LogoutOutlined,
+  MenuOutlined,
+  MessageOutlined,
+  ScheduleOutlined,
+  SettingOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
+import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../context/NotificationsContext';
+import { useI18n, type TKey } from '../i18n';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { LogoMark, Wordmark } from './Logo';
+import { Avatar } from './ui';
+
+const { Sider, Header, Content } = AntLayout;
 
 interface NavItem {
-  to: string
-  label: TKey
-  icon: typeof Bell
-  adminOnly?: boolean
-  badge?: 'notifications' | 'messages'
+  key: string;
+  to: string;
+  label: TKey;
+  icon: React.ReactNode;
+  adminOnly?: boolean;
+  badge?: 'notifications' | 'messages';
 }
 
 const NAV: NavItem[] = [
-  { to: '/', label: 'nav.dashboard', icon: LayoutDashboard },
-  { to: '/elders', label: 'nav.elders', icon: HeartHandshake },
-  { to: '/planner', label: 'nav.planner', icon: CalendarRange },
-  { to: '/events', label: 'nav.events', icon: CalendarDays },
-  { to: '/messages', label: 'nav.messages', icon: MessagesSquare, badge: 'messages' },
-  { to: '/notifications', label: 'nav.notifications', icon: Bell, badge: 'notifications' },
-  { to: '/admin', label: 'nav.admin', icon: ShieldCheck, adminOnly: true },
-]
+  { key: '/', to: '/', label: 'nav.dashboard', icon: <DashboardOutlined /> },
+  { key: '/elders', to: '/elders', label: 'nav.elders', icon: <HeartOutlined /> },
+  { key: '/planner', to: '/planner', label: 'nav.planner', icon: <ScheduleOutlined /> },
+  { key: '/events', to: '/events', label: 'nav.events', icon: <CalendarOutlined /> },
+  { key: '/messages', to: '/messages', label: 'nav.messages', icon: <MessageOutlined />, badge: 'messages' },
+  { key: '/notifications', to: '/notifications', label: 'nav.notifications', icon: <BellOutlined />, badge: 'notifications' },
+  { key: '/admin', to: '/admin', label: 'nav.admin', icon: <SettingOutlined />, adminOnly: true },
+];
+
+function activeKey(pathname: string): string {
+  if (pathname === '/') return '/';
+  const hit = NAV.filter((n) => n.key !== '/').find((n) => pathname === n.key || pathname.startsWith(`${n.key}/`));
+  return hit?.key ?? '/';
+}
 
 export function Layout() {
-  const { profile, signOut, isAdmin } = useAuth()
-  const { unread, unreadMessages } = useNotifications()
-  const { t } = useI18n()
-  const location = useLocation()
-  const [menuOpen, setMenuOpen] = useState(false)
+  const { profile, signOut, isAdmin } = useAuth();
+  const { unread, unreadMessages } = useNotifications();
+  const { t } = useI18n();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => setMenuOpen(false), [location.pathname])
+  useEffect(() => setMenuOpen(false), [location.pathname]);
 
-  if (!profile) return null
-  const counts = { notifications: unread, messages: unreadMessages }
+  if (!profile) return null;
+  const counts = { notifications: unread, messages: unreadMessages };
+  const visible = NAV.filter((n) => !n.adminOnly || isAdmin);
 
-  const nav = (
-    <nav className="flex flex-col gap-1" aria-label="Main">
-      <p className="eyebrow mb-2 px-3 text-brand-300/70">{t('nav.section')}</p>
-      {NAV.filter((n) => !n.adminOnly || isAdmin).map((item) => {
-        const count = item.badge ? counts[item.badge] : 0
-        return (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/'}
-            className={({ isActive }) =>
-              cn(
-                'group relative flex items-center gap-3 rounded-xl px-3 py-2.5 font-medium transition-colors',
-                isActive ? 'bg-white text-brand-900 shadow-sm' : 'text-brand-100/85 hover:bg-white/8 hover:text-white',
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <item.icon size={19} aria-hidden className={isActive ? 'text-brand-600' : 'text-brand-300 group-hover:text-white'} />
-                <span className="flex-1">{t(item.label)}</span>
-                {count > 0 && (
-                  <span className="tabular min-w-5 rounded-full bg-sun-500 px-1.5 text-center text-xs font-bold text-brand-950">{count > 99 ? '99+' : count}</span>
-                )}
-              </>
-            )}
-          </NavLink>
-        )
-      })}
-    </nav>
-  )
+  const menuItems = visible.map((item) => {
+    const count = item.badge ? counts[item.badge] : 0;
+    return {
+      key: item.key,
+      icon: item.icon,
+      label: (
+        <Flex justify="space-between" align="center" gap={8} style={{ width: '100%' }}>
+          <span>{t(item.label)}</span>
+          {count > 0 && (
+            <AntBadge count={count > 99 ? '99+' : count} size="small" style={{ backgroundColor: '#e9a23b', color: '#09222a', fontWeight: 700 }} />
+          )}
+        </Flex>
+      ),
+    };
+  });
+
+  const siderMenu = (
+    <Menu
+      theme="dark"
+      mode="inline"
+      selectedKeys={[activeKey(location.pathname)]}
+      items={menuItems}
+      onClick={({ key }) => navigate(key)}
+      style={{ background: 'transparent', border: 'none' }}
+    />
+  );
+
+  const userMenu = [
+    { key: 'profile', icon: <UserOutlined />, label: t('nav.profile') },
+    { type: 'divider' as const },
+    { key: 'logout', icon: <LogoutOutlined />, label: t('nav.logout'), danger: true },
+  ];
 
   const userBlock = (
     <div className="flex flex-col gap-3 border-t border-white/10 pt-4">
       <LanguageSwitcher userId={profile.id} dark />
-      <div className="flex items-center gap-1">
+      <Flex align="center" gap={8}>
         <NavLink to="/profile" className="flex min-w-0 flex-1 items-center gap-3 rounded-xl p-2 hover:bg-white/8">
           <Avatar name={profile.full_name} size={36} />
           <div className="min-w-0 flex-1">
-            <p className="truncate font-medium text-white">{profile.full_name || profile.email}</p>
-            <p className="text-xs text-brand-300">{t(`role.${profile.role}`)}</p>
+            <Typography.Text strong style={{ color: '#fff', display: 'block' }} ellipsis>
+              {profile.full_name || profile.email}
+            </Typography.Text>
+            <Typography.Text style={{ color: '#a6cbd1', fontSize: 12 }}>{t(`role.${profile.role}`)}</Typography.Text>
           </div>
         </NavLink>
-        <button type="button" onClick={() => void signOut()} title={t('nav.logout')} aria-label={t('nav.logout')} className="rounded-lg p-2.5 text-brand-300 hover:bg-white/8 hover:text-white">
-          <LogOut size={18} />
-        </button>
-      </div>
+        <Dropdown
+          menu={{
+            items: userMenu,
+            onClick: ({ key }) => {
+              if (key === 'logout') void signOut();
+              else navigate('/profile');
+            },
+          }}
+          trigger={['click']}
+          placement="topRight"
+        >
+          <Button type="text" style={{ color: '#a6cbd1' }} aria-label={t('nav.logout')}>
+            <LogoutOutlined />
+          </Button>
+        </Dropdown>
+      </Flex>
     </div>
-  )
+  );
 
   return (
-    <div className="min-h-screen lg:grid lg:grid-cols-[17rem_1fr]">
-      {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen flex-col gap-7 overflow-hidden bg-brand-900 p-4 lg:flex">
+    <AntLayout style={{ minHeight: '100vh' }}>
+      {/* Desktop sider */}
+      <Sider width={272} breakpoint="lg" collapsedWidth={0} trigger={null} className="!hidden lg:!block" style={{ position: 'sticky', top: 0, height: '100vh', padding: 16 }}>
         <SidebarGlow />
-        <div className="relative flex items-center gap-2.5 px-2 pt-1">
+        <Flex align="center" gap={10} style={{ padding: '4px 8px 24px', position: 'relative' }}>
           <LogoMark dark />
           <Wordmark light />
-        </div>
-        <div className="relative flex-1 overflow-y-auto">{nav}</div>
-        <div className="relative">{userBlock}</div>
-      </aside>
+        </Flex>
+        <Typography.Text strong style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(166,203,209,0.7)', padding: '0 12px 8px', display: 'block', position: 'relative' }}>
+          {t('nav.section')}
+        </Typography.Text>
+        <div style={{ position: 'relative' }}>{siderMenu}</div>
+        <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>{userBlock}</div>
+      </Sider>
 
-      {/* Mobile top bar */}
-      <header className="sticky top-0 z-30 flex items-center justify-between bg-brand-900 px-4 py-2.5 lg:hidden">
-        <div className="flex items-center gap-2">
-          <LogoMark size={30} dark />
-          <Wordmark light />
-        </div>
-        <div className="flex items-center gap-1">
-          <NavLink to="/notifications" className="relative rounded-lg p-2 text-brand-100 hover:bg-white/10" aria-label={t('nav.notifications')}>
-            <Bell size={20} />
-            {unread > 0 && <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-sun-500 ring-2 ring-brand-900" />}
-          </NavLink>
-          <button type="button" className="rounded-lg p-2 text-brand-100 hover:bg-white/10" onClick={() => setMenuOpen((o) => !o)} aria-label="Menu" aria-expanded={menuOpen}>
-            {menuOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
-        </div>
-      </header>
-      {menuOpen && (
-        <div className="fixed inset-x-0 top-[54px] bottom-0 z-20 flex flex-col gap-6 overflow-y-auto bg-brand-900 p-4 lg:hidden">
-          {nav}
-          {userBlock}
-        </div>
-      )}
+      <AntLayout>
+        {/* Mobile header */}
+        <Header className="lg:!hidden" style={{ padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 30, height: 56 }}>
+          <Space>
+            <LogoMark size={30} dark />
+            <Wordmark light />
+          </Space>
+          <Space>
+            <NavLink to="/notifications" aria-label={t('nav.notifications')} style={{ color: '#d2e5e8', padding: 8, position: 'relative' }}>
+              <AntBadge dot={unread > 0} color="#e9a23b">
+                <BellOutlined style={{ fontSize: 20 }} />
+              </AntBadge>
+            </NavLink>
+            <Button type="text" onClick={() => setMenuOpen((o) => !o)} aria-label="Menu" style={{ color: '#d2e5e8' }}>
+              <MenuOutlined style={{ fontSize: 20 }} />
+            </Button>
+          </Space>
+        </Header>
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
-        <Outlet />
-      </main>
-    </div>
-  )
+        <Drawer
+          placement="left"
+          open={menuOpen}
+          onClose={() => setMenuOpen(false)}
+          styles={{ body: { background: '#0d2d34', padding: 16, display: 'flex', flexDirection: 'column', gap: 24 }, header: { background: '#0d2d34', borderBottom: '1px solid rgba(255,255,255,0.1)' } }}
+          title={
+            <Space>
+              <LogoMark size={28} dark />
+              <Wordmark light />
+            </Space>
+          }
+          width={300}
+        >
+          <div>
+            <Typography.Text strong style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(166,203,209,0.7)', padding: '0 12px 8px', display: 'block' }}>
+              {t('nav.section')}
+            </Typography.Text>
+            <Menu theme="dark" mode="inline" selectedKeys={[activeKey(location.pathname)]} items={menuItems} onClick={({ key }) => navigate(key)} style={{ background: 'transparent', border: 'none' }} />
+          </div>
+          <div style={{ marginTop: 'auto' }}>{userBlock}</div>
+        </Drawer>
+
+        <Content style={{ padding: '24px 16px 48px' }}>
+          <div style={{ maxWidth: 1120, margin: '0 auto' }}>
+            <Outlet />
+          </div>
+        </Content>
+      </AntLayout>
+    </AntLayout>
+  );
 }
 
 /** Faint arc motif in the sidebar corner — the same arc as the logo and the dashboard. */
@@ -139,5 +201,9 @@ function SidebarGlow() {
       <path d="M60 210a100 100 0 0 1 200 0" fill="none" stroke="#fff" strokeWidth="2" />
       <path d="M100 210a60 60 0 0 1 120 0" fill="none" stroke="#fff" strokeWidth="2" />
     </svg>
-  )
+  );
+}
+
+export function UserAvatar({ name }: { name: string }) {
+  return <AntAvatar style={{ backgroundColor: '#2a7886' }}>{name.slice(0, 2).toUpperCase()}</AntAvatar>;
 }

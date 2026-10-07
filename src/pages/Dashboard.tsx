@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Col, Flex, Row, Statistic, Switch, Typography } from 'antd'
 import { addDays, endOfDay, startOfDay, subDays } from 'date-fns'
 import { ArrowRight, CalendarDays, CheckCheck, Clock, HeartHandshake, NotebookPen, Sparkles, TriangleAlert } from 'lucide-react'
 import { fetchActivities, fetchElders, fetchEvents, fetchObservations, errorMessage } from '../lib/api'
@@ -13,7 +14,7 @@ import { ActivityDetailModal, ActivityFormModal, ActivityRow, CATEGORY_ICON, isO
 import { DayArc, DayArcLegend } from '../components/DayArc'
 import { EVENT_ICON, IMPORTANCE_TONE } from '../components/events'
 import { ObservationCard } from '../components/observations'
-import { Avatar, Badge, Button, Card, CardHeader, cn, EmptyState, Ring, Spinner } from '../components/ui'
+import { Avatar, Badge, Button, Card, CardHeader, EmptyState, Ring, Spinner } from '../components/ui'
 
 type ElderWithCount = Elder & { elder_members: { count: number }[] }
 
@@ -190,13 +191,10 @@ export function DashboardPage() {
               <DayArcLegend labels={{ done: t('status.done'), planned: t('status.planned'), overdue: t('activity.overdue'), missed: t('status.missed'), now: t('dashboard.now') }} />
             </div>
             {profile.role !== 'family' && (
-              <label className="flex w-fit cursor-pointer items-center gap-2.5 text-sm text-brand-100">
-                <span className={cn('relative h-6 w-10 rounded-full transition-colors', onlyMine ? 'bg-sun-500' : 'bg-white/15')}>
-                  <input type="checkbox" className="peer sr-only" checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />
-                  <span className={cn('absolute top-1 h-4 w-4 rounded-full bg-white transition-all', onlyMine ? 'left-5' : 'left-1')} />
-                </span>
-                {t('dashboard.onlyMine')}
-              </label>
+              <Flex align="center" gap={8}>
+                <Switch size="small" checked={onlyMine} onChange={setOnlyMine} style={{ background: onlyMine ? '#e9a23b' : undefined }} />
+                <Typography.Text style={{ color: '#d2e5e8', fontSize: 14 }}>{t('dashboard.onlyMine')}</Typography.Text>
+              </Flex>
             )}
           </div>
 
@@ -218,12 +216,20 @@ export function DashboardPage() {
       </section>
 
       {/* ---------------------------------------------------------------- KPIs */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Kpi icon={<CheckCheck size={18} />} label={t('dashboard.statCompletion')} value={stats.completion === null ? '—' : `${stats.completion}%`} hint={t('dashboard.last7days')} tone="ok" />
-        <Kpi icon={<Clock size={18} />} label={t('dashboard.statOverdue')} value={stats.overdue} hint={t('dashboard.rightNow')} tone={stats.overdue ? 'warn' : 'neutral'} />
-        <Kpi icon={<TriangleAlert size={18} />} label={t('dashboard.statAlerts')} value={stats.alerts} hint={t('dashboard.last7days')} tone={stats.alerts ? 'bad' : 'neutral'} />
-        <Kpi icon={<CalendarDays size={18} />} label={t('dashboard.statUpcoming')} value={stats.upcoming} hint={t('dashboard.next14days')} tone="plan" />
-      </div>
+      <Row gutter={[12, 12]}>
+        <Col xs={12} lg={6}>
+          <Kpi icon={<CheckCheck size={18} />} label={t('dashboard.statCompletion')} value={stats.completion === null ? '—' : `${stats.completion}%`} hint={t('dashboard.last7days')} tone="ok" />
+        </Col>
+        <Col xs={12} lg={6}>
+          <Kpi icon={<Clock size={18} />} label={t('dashboard.statOverdue')} value={stats.overdue} hint={t('dashboard.rightNow')} tone={stats.overdue ? 'warn' : 'neutral'} />
+        </Col>
+        <Col xs={12} lg={6}>
+          <Kpi icon={<TriangleAlert size={18} />} label={t('dashboard.statAlerts')} value={stats.alerts} hint={t('dashboard.last7days')} tone={stats.alerts ? 'bad' : 'neutral'} />
+        </Col>
+        <Col xs={12} lg={6}>
+          <Kpi icon={<CalendarDays size={18} />} label={t('dashboard.statUpcoming')} value={stats.upcoming} hint={t('dashboard.next14days')} tone="plan" />
+        </Col>
+      </Row>
 
       {/* ---------------------------------------------------------------- Plan + side column */}
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
@@ -333,15 +339,23 @@ export function DashboardPage() {
 }
 
 function Kpi({ icon, label, value, hint, tone }: { icon: React.ReactNode; label: string; value: React.ReactNode; hint: string; tone: 'ok' | 'warn' | 'bad' | 'plan' | 'neutral' }) {
-  const toneCls = { ok: 'bg-ok-50 text-ok-600', warn: 'bg-warn-50 text-warn-600', bad: 'bg-bad-50 text-bad-600', plan: 'bg-plan-50 text-plan-600', neutral: 'bg-surface-2 text-ink-faint' }[tone]
+  const toneStyle = {
+    ok: { background: '#eaf5ec', color: '#3a8a4b' },
+    warn: { background: '#fdf3e1', color: '#b26f0f' },
+    bad: { background: '#fcebe8', color: '#c23b2c' },
+    plan: { background: '#eeeffa', color: '#4a4e94' },
+    neutral: { background: '#e6eceb', color: '#485a61' },
+  }[tone]
   return (
-    <Card className="animate-rise p-4">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-ink-soft">{label}</p>
-        <span className={cn('flex h-8 w-8 items-center justify-center rounded-lg', toneCls)}>{icon}</span>
+    <Card className="animate-rise h-full">
+      <div className="p-4">
+        <Flex justify="space-between" align="center" gap={8}>
+          <Typography.Text type="secondary" style={{ fontSize: 14 }}>{label}</Typography.Text>
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg" style={toneStyle}>{icon}</span>
+        </Flex>
+        <Statistic value={typeof value === 'number' ? value : undefined} title="" formatter={typeof value === 'number' ? undefined : () => value as React.ReactNode} style={{ marginTop: 8 }} valueStyle={{ fontSize: 30, fontWeight: 800, letterSpacing: '-0.02em' }} />
+        <Typography.Text type="secondary" style={{ fontSize: 12 }}>{hint}</Typography.Text>
       </div>
-      <p className="font-display tabular mt-3 text-3xl font-bold tracking-tight">{value}</p>
-      <p className="mt-1 text-xs text-ink-faint">{hint}</p>
     </Card>
   )
 }

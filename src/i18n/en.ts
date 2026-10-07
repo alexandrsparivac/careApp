@@ -37,6 +37,7 @@ const en: Dictionary = {
   'nav.messages': 'Messages',
   'nav.notifications': 'Notifications',
   'nav.admin': 'Administration',
+  'nav.profile': 'Profile',
   'nav.logout': 'Sign out',
 
   'role.admin': 'Administrator',

@@ -37,6 +37,7 @@ const ro = {
   'nav.messages': 'Mesaje',
   'nav.notifications': 'Notificări',
   'nav.admin': 'Administrare',
+  'nav.profile': 'Profil',
   'nav.logout': 'Deconectare',
 
   'role.admin': 'Administrator',

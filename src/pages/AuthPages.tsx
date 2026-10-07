@@ -1,12 +1,13 @@
 import { useState, type ReactNode } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Alert, Card as AntCard, Flex, Form, Input as AntInput, Radio, Typography } from 'antd'
 import { HeartHandshake, ShieldCheck, Stethoscope } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useI18n } from '../i18n'
 import { LanguageSwitcher } from '../components/LanguageSwitcher'
 import { LogoMark, Wordmark } from '../components/Logo'
-import { Button, cn, ErrorNote, Field, Input } from '../components/ui'
+import { Button } from '../components/ui'
 import type { Role } from '../lib/types'
 
 function AuthShell({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
@@ -73,10 +74,12 @@ function AuthShell({ title, subtitle, children }: { title: string; subtitle: str
           </div>
           <LanguageSwitcher />
         </div>
-        <div className="animate-rise mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-10">
-          <h2 className="text-[1.9rem] leading-tight font-bold tracking-tight">{title}</h2>
-          <p className="mt-2 mb-8 text-ink-soft">{subtitle}</p>
-          {children}
+        <div className="animate-rise mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-10">
+          <AntCard variant="outlined" style={{ borderRadius: 18 }} styles={{ body: { padding: 28 } }}>
+            <Typography.Title level={3} style={{ margin: 0 }}>{title}</Typography.Title>
+            <Typography.Paragraph type="secondary" style={{ margin: '8px 0 24px' }}>{subtitle}</Typography.Paragraph>
+            {children}
+          </AntCard>
         </div>
       </main>
     </div>
@@ -87,18 +90,15 @@ export function LoginPage() {
   const { session } = useAuth()
   const { t } = useI18n()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   if (session) return <Navigate to="/" replace />
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const submit = async (values: { email: string; password: string }) => {
     setLoading(true)
     setError(null)
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+    const { error } = await supabase.auth.signInWithPassword({ email: values.email.trim(), password: values.password })
     setLoading(false)
     if (error) return setError(error.message === 'Invalid login credentials' ? t('auth.invalidCredentials') : error.message)
     navigate('/')
@@ -106,15 +106,21 @@ export function LoginPage() {
 
   return (
     <AuthShell title={t('auth.loginTitle')} subtitle={t('auth.loginSubtitle')}>
-      <form onSubmit={submit} className="flex flex-col gap-4">
-        <Field label={t('auth.email')}>{(id) => <Input id={id} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />}</Field>
-        <Field label={t('auth.password')}>{(id) => <Input id={id} type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />}</Field>
-        {error && <ErrorNote>{error}</ErrorNote>}
-        <Button type="submit" loading={loading} className="mt-2 w-full">
-          {t('auth.login')}
-        </Button>
-      </form>
-      <p className="mt-8 text-center text-ink-soft">
+      <Form layout="vertical" onFinish={(v) => void submit(v)} requiredMark={false}>
+        <Form.Item label={t('auth.email')} name="email" rules={[{ required: true, type: 'email' }]}>
+          <AntInput size="large" type="email" autoComplete="email" placeholder="nume@exemplu.ro" />
+        </Form.Item>
+        <Form.Item label={t('auth.password')} name="password" rules={[{ required: true }]} style={{ marginBottom: error ? 12 : 24 }}>
+          <AntInput.Password size="large" autoComplete="current-password" placeholder="••••••••" />
+        </Form.Item>
+        {error && <Alert type="error" showIcon message={error} style={{ marginBottom: 16, borderRadius: 10 }} />}
+        <Form.Item style={{ marginBottom: 0 }}>
+          <Button type="submit" loading={loading} className="w-full" style={{ height: 46 }}>
+            {t('auth.login')}
+          </Button>
+        </Form.Item>
+      </Form>
+      <p className="mt-6 text-center text-ink-soft">
         {t('auth.noAccount')}{' '}
         <Link to="/register" className="font-semibold text-brand-600 underline-offset-4 hover:underline">
           {t('auth.register')}
@@ -127,33 +133,28 @@ export function LoginPage() {
 export function RegisterPage() {
   const { session } = useAuth()
   const { t, lang } = useI18n()
-  const [form, setForm] = useState({ full_name: '', email: '', phone: '', password: '', role: 'family' as Exclude<Role, 'admin'> })
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [sent, setSent] = useState(false)
+  const [sentEmail, setSentEmail] = useState<string | null>(null)
 
   if (session) return <Navigate to="/" replace />
 
-  const set = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }))
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (form.password.length < 8) return setError(t('auth.passwordMin'))
+  const submit = async (values: { full_name: string; email: string; phone?: string; password: string; role: Exclude<Role, 'admin'> }) => {
     setLoading(true)
     setError(null)
     const { data, error } = await supabase.auth.signUp({
-      email: form.email.trim(),
-      password: form.password,
-      options: { data: { full_name: form.full_name.trim(), phone: form.phone.trim() || null, role: form.role, language: lang } },
+      email: values.email.trim(),
+      password: values.password,
+      options: { data: { full_name: values.full_name.trim(), phone: values.phone?.trim() || null, role: values.role, language: lang } },
     })
     setLoading(false)
     if (error) return setError(error.message)
-    if (!data.session) setSent(true) // email confirmation is enabled in Supabase
+    if (!data.session) setSentEmail(values.email) // email confirmation is enabled in Supabase
   }
 
-  if (sent) {
+  if (sentEmail) {
     return (
-      <AuthShell title={t('auth.checkEmailTitle')} subtitle={t('auth.checkEmail', { email: form.email })}>
+      <AuthShell title={t('auth.checkEmailTitle')} subtitle={t('auth.checkEmail', { email: sentEmail })}>
         <Link to="/login" className="font-semibold text-brand-600 hover:underline">
           ← {t('auth.login')}
         </Link>
@@ -163,42 +164,40 @@ export function RegisterPage() {
 
   return (
     <AuthShell title={t('auth.registerTitle')} subtitle={t('auth.registerSubtitle')}>
-      <form onSubmit={submit} className="flex flex-col gap-4">
-        <fieldset>
-          <legend className="mb-2 text-sm font-medium text-ink-soft">{t('auth.iAm')}</legend>
-          <div className="grid grid-cols-2 gap-2">
-            {(
-              [
-                { role: 'family', icon: HeartHandshake },
-                { role: 'caregiver', icon: Stethoscope },
-              ] as const
-            ).map(({ role, icon: Icon }) => (
-              <button
-                key={role}
-                type="button"
-                aria-pressed={form.role === role}
-                onClick={() => set('role', role)}
-                className={cn('flex flex-col items-start gap-2 rounded-xl border p-3 text-left transition-all', form.role === role ? 'border-brand-600 bg-brand-50 ring-2 ring-brand-500' : 'border-line bg-white hover:bg-surface')}
-              >
-                <Icon size={20} className={form.role === role ? 'text-brand-600' : 'text-ink-faint'} aria-hidden />
-                <span className="font-semibold">{t(`role.${role}`)}</span>
-              </button>
-            ))}
-          </div>
-        </fieldset>
-        <Field label={t('auth.fullName')}>{(id) => <Input id={id} required autoComplete="name" value={form.full_name} onChange={(e) => set('full_name', e.target.value)} />}</Field>
-        <Field label={t('auth.email')}>{(id) => <Input id={id} type="email" required autoComplete="email" value={form.email} onChange={(e) => set('email', e.target.value)} />}</Field>
-        <Field label={`${t('auth.phone')} (${t('common.optional')})`}>{(id) => <Input id={id} type="tel" autoComplete="tel" value={form.phone} onChange={(e) => set('phone', e.target.value)} />}</Field>
-        <Field label={t('auth.password')} hint={t('auth.passwordMin')}>
-          {(id) => <Input id={id} type="password" required minLength={8} autoComplete="new-password" value={form.password} onChange={(e) => set('password', e.target.value)} />}
-        </Field>
-        {error && <ErrorNote>{error}</ErrorNote>}
-        <Button type="submit" loading={loading} className="mt-2 w-full">
-          {t('auth.register')}
-        </Button>
-        <p className="text-sm text-ink-faint">{t('auth.accessNote')}</p>
-      </form>
-      <p className="mt-8 text-center text-ink-soft">
+      <Form layout="vertical" initialValues={{ role: 'family' }} onFinish={(v) => void submit(v)} requiredMark={false}>
+        <Form.Item label={t('auth.iAm')} name="role" style={{ marginBottom: 16 }}>
+          <Radio.Group buttonStyle="solid" style={{ width: '100%' }}>
+            <Flex gap={8} style={{ width: '100%' }}>
+              <Radio.Button value="family" style={{ flex: 1, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <HeartHandshake size={17} /> {t('role.family')}
+              </Radio.Button>
+              <Radio.Button value="caregiver" style={{ flex: 1, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <Stethoscope size={17} /> {t('role.caregiver')}
+              </Radio.Button>
+            </Flex>
+          </Radio.Group>
+        </Form.Item>
+        <Form.Item label={t('auth.fullName')} name="full_name" rules={[{ required: true }]}>
+          <AntInput size="large" autoComplete="name" />
+        </Form.Item>
+        <Form.Item label={t('auth.email')} name="email" rules={[{ required: true, type: 'email' }]}>
+          <AntInput size="large" type="email" autoComplete="email" />
+        </Form.Item>
+        <Form.Item label={`${t('auth.phone')} (${t('common.optional')})`} name="phone">
+          <AntInput size="large" type="tel" autoComplete="tel" />
+        </Form.Item>
+        <Form.Item label={t('auth.password')} name="password" rules={[{ required: true, min: 8, message: t('auth.passwordMin') }]} extra={t('auth.passwordMin')}>
+          <AntInput.Password size="large" autoComplete="new-password" />
+        </Form.Item>
+        {error && <Alert type="error" showIcon message={error} style={{ marginBottom: 16, borderRadius: 10 }} />}
+        <Form.Item style={{ marginBottom: 8 }}>
+          <Button type="submit" loading={loading} className="w-full" style={{ height: 46 }}>
+            {t('auth.register')}
+          </Button>
+        </Form.Item>
+        <Typography.Paragraph type="secondary" style={{ fontSize: 13, margin: 0 }}>{t('auth.accessNote')}</Typography.Paragraph>
+      </Form>
+      <p className="mt-6 text-center text-ink-soft">
         {t('auth.haveAccount')}{' '}
         <Link to="/login" className="font-semibold text-brand-600 underline-offset-4 hover:underline">
           {t('auth.login')}

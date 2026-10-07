@@ -62,7 +62,7 @@
 }
 
 html {
-  font-size: 17px; /* slightly larger base — many family members are older adults */
+  font-size: 16px; /* Ant Design lucrează pe 14-15px; baza ușor mărită pentru accesibilitate */
   -webkit-font-smoothing: antialiased;
 }
 
@@ -71,6 +71,53 @@ body {
   /* faint paper grain so large empty areas don't feel flat */
   background-image: radial-gradient(rgb(13 45 52 / 0.035) 1px, transparent 1px);
   background-size: 22px 22px;
+}
+
+/* ---- Ant Design coexistence & polish ---------------------------------- */
+.ant-layout {
+  background: var(--color-surface);
+}
+.ant-card {
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.ant-card .ant-card-body {
+  background: #fff;
+}
+.ant-menu-dark .ant-menu-item-selected {
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.25);
+}
+.ant-menu-dark .ant-menu-item-selected .ant-menu-title-content {
+  color: #0d2d34 !important;
+  font-weight: 600;
+}
+.ant-menu-dark .ant-menu-item-selected .anticon {
+  color: #1c5e6b !important;
+}
+.ant-segmented {
+  padding: 4px;
+  background: #fff;
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-card);
+}
+.ant-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+}
+.ant-statistic-content {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+.ant-modal-content {
+  overflow: hidden;
+}
+.ant-empty-image svg {
+  color: var(--color-brand-200);
+}
+.ant-care-input {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 h1,

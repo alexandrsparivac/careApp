@@ -12,9 +12,11 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.3.4",
     "@fontsource-variable/onest": "^5.3.1",
     "@fontsource/unbounded": "^5.3.0",
     "@supabase/supabase-js": "^2.117.2",
+    "antd": "^6.6.5",
     "date-fns": "^4.4.0",
     "lucide-react": "^1.48.0",
     "react": "^19.3.0",

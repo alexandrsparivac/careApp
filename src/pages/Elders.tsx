@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Col, Flex, Input as AntInput, Row, Typography } from 'antd'
+import { SearchOutlined } from '@ant-design/icons'
 import { differenceInYears, endOfDay, startOfDay } from 'date-fns'
-import { HeartHandshake, Plus, Search, TriangleAlert, Users } from 'lucide-react'
+import { HeartHandshake, Plus, TriangleAlert, Users } from 'lucide-react'
 import { fetchActivities, fetchElders, useQuery } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import { useI18n } from '../i18n'
 import { ElderFormModal } from '../components/ElderForm'
-import { Avatar, Button, Card, EmptyState, Input, PageHeader, Ring, Spinner } from '../components/ui'
+import { Avatar, Button, Card, EmptyState, PageHeader, Ring, Spinner } from '../components/ui'
 
 export function age(birth: string | null) {
   return birth ? differenceInYears(new Date(), new Date(birth)) : null
@@ -60,9 +62,8 @@ export function EldersPage() {
       />
 
       {(data?.elders.length ?? 0) > 4 && (
-        <div className="relative mb-5 max-w-sm">
-          <Search size={17} className="absolute top-1/2 left-3 -translate-y-1/2 text-ink-faint" aria-hidden />
-          <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('common.search')} className="pl-9" aria-label={t('common.search')} />
+        <div className="mb-5 max-w-sm">
+          <AntInput value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('common.search')} prefix={<SearchOutlined style={{ color: '#74868c' }} />} allowClear size="large" aria-label={t('common.search')} />
         </div>
       )}
 
@@ -75,36 +76,44 @@ export function EldersPage() {
           <EmptyState icon={<HeartHandshake size={40} />} title={t('elders.empty')} text={isAdmin ? t('dashboard.noEldersAdminText') : t('dashboard.noEldersText')} />
         </Card>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <Row gutter={[16, 16]}>
           {elders.map((el, i) => {
             const s = progress.get(el.id)
             const years = age(el.birth_date)
             return (
-              <li key={el.id} className="animate-rise" style={{ animationDelay: `${i * 40}ms` }}>
-                <Link to={`/elders/${el.id}`} className="group flex h-full flex-col rounded-2xl border border-line/70 bg-white p-5 shadow-card transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-float">
-                  <div className="flex items-center gap-4">
-                    <Ring value={s ? s.done / s.total : null} size={68} stroke={4}>
-                      <Avatar name={el.full_name} size={54} />
-                    </Ring>
-                    <div className="min-w-0">
-                      <h2 className="truncate text-lg font-semibold tracking-tight group-hover:text-brand-700">{el.full_name}</h2>
-                      <p className="text-sm text-ink-faint">
-                        {[years !== null && t('elders.age', { n: years }), el.gender && t(`gender.${el.gender}`)].filter(Boolean).join(' · ')}
-                      </p>
+              <Col key={el.id} xs={24} sm={12} xl={8} className="animate-rise" style={{ animationDelay: `${i * 40}ms` }}>
+                <Link to={`/elders/${el.id}`} className="group block h-full">
+                  <Card hoverable className="h-full transition-all group-hover:-translate-y-0.5">
+                    <div className="p-5">
+                      <Flex align="center" gap={16}>
+                        <Ring value={s ? s.done / s.total : null} size={68} stroke={4}>
+                          <Avatar name={el.full_name} size={54} />
+                        </Ring>
+                        <div className="min-w-0">
+                          <Typography.Title level={4} style={{ margin: 0 }} className="truncate group-hover:!text-[#1c5e6b]">
+                            {el.full_name}
+                          </Typography.Title>
+                          <Typography.Text type="secondary" style={{ fontSize: 14 }}>
+                            {[years !== null && t('elders.age', { n: years }), el.gender && t(`gender.${el.gender}`)].filter(Boolean).join(' · ')}
+                          </Typography.Text>
+                        </div>
+                      </Flex>
+                      {el.medical_conditions && <Typography.Paragraph type="secondary" ellipsis={{ rows: 2 }} style={{ margin: '16px 0 0', fontSize: 14 }}>{el.medical_conditions}</Typography.Paragraph>}
+                      <Flex justify="space-between" align="center" style={{ marginTop: 16 }}>
+                        <Typography.Text strong style={{ fontSize: 13, color: '#485a61' }} className="tabular">
+                          {s ? t('dashboard.elderProgress', { done: s.done, total: s.total }) : t('dashboard.elderNoPlan')}
+                        </Typography.Text>
+                        <Typography.Text type="secondary" style={{ fontSize: 13 }}>
+                          <Users size={14} aria-hidden style={{ verticalAlign: -2 }} /> {el.elder_members[0]?.count ?? 0}
+                        </Typography.Text>
+                      </Flex>
                     </div>
-                  </div>
-                  {el.medical_conditions && <p className="mt-4 line-clamp-2 text-sm text-ink-soft">{el.medical_conditions}</p>}
-                  <div className="mt-auto flex items-center justify-between gap-2 pt-4 text-sm">
-                    <span className="tabular font-medium text-ink-soft">{s ? t('dashboard.elderProgress', { done: s.done, total: s.total }) : t('dashboard.elderNoPlan')}</span>
-                    <span className="inline-flex items-center gap-1 text-ink-faint">
-                      <Users size={14} aria-hidden /> {el.elder_members[0]?.count ?? 0}
-                    </span>
-                  </div>
+                  </Card>
                 </Link>
-              </li>
+              </Col>
             )
           })}
-        </ul>
+        </Row>
       )}
 
       <ElderFormModal open={formOpen} onClose={() => setFormOpen(false)} onSaved={(id) => navigate(`/elders/${id}`)} />
